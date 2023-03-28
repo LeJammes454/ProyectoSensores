@@ -10,6 +10,8 @@ import android.os.Handler
 import android.util.DisplayMetrics
 import android.util.Log
 import android.widget.ImageView
+import android.widget.Toast
+import kotlin.math.log
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
@@ -18,12 +20,20 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var ballImage: ImageView
     private lateinit var displayMetrics: DisplayMetrics
     private var ballWidth = 0
-    private var ballHeigh = 0
+    private var ballHeight = 0
     private var x = 0f
     private var y = 0f
     private lateinit var handler: Handler
     private lateinit var goalTop: ImageView
     private lateinit var goalBottom: ImageView
+
+    private var goalTopX: Float = 0f
+    private var goalTopY: Float = 0f
+    private var goalBottomX: Float = 0f
+    private var goalBottomY: Float = 0f
+    private var goalWidth: Float = 0f
+    private var goalHeight: Float = 0f
+
 
     private inner class UpdateBallPositionRunnable : Runnable {
         override fun run() {
@@ -50,6 +60,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 ballImage.translationY = newY
             }
 
+            if (newX >= goalTopX && newX <= goalTopX + goalWidth && newY <= goalHeight) {
+                Log.d("gol","¡Gol en la portería superior!")
+            } else if (newX >= goalBottomX && newX <= goalBottomX + goalWidth && newY >= dph - goalHeight - ballHeight) {
+                Log.d("gol","¡Gol en la portería inferior!")
+            }
+
 
 
 
@@ -64,7 +80,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         ballImage = findViewById(R.id.ballImage)
         displayMetrics = resources.displayMetrics
         ballWidth = ballImage.width
-        ballHeigh = ballImage.height
+        ballHeight = ballImage.height
+
+        goalWidth = displayMetrics.widthPixels * 0.4f
+        goalHeight = displayMetrics.heightPixels * 0.05f
+        goalTopX = (displayMetrics.widthPixels - goalWidth) / 2
+        goalTopY = 0f
+        goalBottomX = goalTopX
+        goalBottomY = displayMetrics.heightPixels - goalHeight
+
 
         // Actualizamos la posición inicial del balón para que inicie en la mitad de la pantalla
         val initialX = (displayMetrics.widthPixels - ballWidth) / 2f

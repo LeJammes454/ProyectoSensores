@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.DisplayMetrics
+import android.util.Log
 import android.widget.ImageView
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
@@ -17,30 +18,40 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var ballImage: ImageView
     private lateinit var displayMetrics: DisplayMetrics
     private var ballWidth = 0
+    private var ballHeigh = 0
     private var x = 0f
     private var y = 0f
     private lateinit var handler: Handler
+    private lateinit var goalTop: ImageView
+    private lateinit var goalBottom: ImageView
 
     private inner class UpdateBallPositionRunnable : Runnable {
         override fun run() {
             val newX = ballImage.translationX - x
             val newY = ballImage.translationY + y
 
+            val dpw = displayMetrics.widthPixels - 120
+            val dph = displayMetrics.heightPixels - 90
+
+
             if (newX < 0) {
                 ballImage.translationX = 0f
-            } else if (newX + ballWidth > displayMetrics.widthPixels) {
-                ballImage.translationX = (displayMetrics.widthPixels - ballWidth).toFloat()
+            } else if (newX + ballWidth > dpw) {
+                ballImage.translationX = (dpw - ballWidth).toFloat()
             } else {
                 ballImage.translationX = newX
             }
 
             if (newY < 0) {
                 ballImage.translationY = 0f
-            } else if (newY + ballWidth > displayMetrics.heightPixels) {
-                ballImage.translationY = (displayMetrics.heightPixels - ballWidth).toFloat()
+            } else if (newY + ballWidth > dph) {
+                ballImage.translationY = (dph - ballWidth).toFloat()
             } else {
                 ballImage.translationY = newY
             }
+
+
+
 
             handler.postDelayed(this, 16) // Se vuelve a enviar el mensaje al hilo secundario
         }
@@ -53,6 +64,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         ballImage = findViewById(R.id.ballImage)
         displayMetrics = resources.displayMetrics
         ballWidth = ballImage.width
+        ballHeigh = ballImage.height
+
+        // Actualizamos la posición inicial del balón para que inicie en la mitad de la pantalla
+        val initialX = (displayMetrics.widthPixels - ballWidth) / 2f
+        val initialY = (displayMetrics.heightPixels - ballWidth) / 2f
+        ballImage.translationX = initialX
+        ballImage.translationY = initialY
 
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)

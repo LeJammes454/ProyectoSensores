@@ -1,5 +1,5 @@
 package com.example.proyectosensores
-import android.annotation.SuppressLint
+
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -10,8 +10,6 @@ import android.os.Handler
 import android.util.DisplayMetrics
 import android.util.Log
 import android.widget.ImageView
-import android.widget.Toast
-import kotlin.math.log
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
@@ -41,6 +39,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var goalBottomY: Float = 0f
     private var goalWidth: Float = 0f
     private var goalHeight: Float = 0f
+
+    // variables para los goles anotados
+    private var golSuperior = 0
+    private var golInferior = 0
 
 
     private inner class UpdateBallPositionRunnable : Runnable {
@@ -74,12 +76,16 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             //logica para caundo anota gol
             if (newX >= goalTopX && newX <= goalTopX + goalWidth && newY <= goalHeight) {
                 Log.d("gol","¡Gol en la portería superior!")
+                golSuperior++
+                Log.d("Gol inferior", "Goles anotados$golSuperior")
                 val initialX = (displayMetrics.widthPixels - ballWidth) / 2f
                 val initialY = (displayMetrics.heightPixels - ballWidth) / 2f
                 ballImage.translationX = initialX
                 ballImage.translationY = initialY
             } else if (newX >= goalBottomX && newX <= goalBottomX + goalWidth && newY >= dph - goalHeight - ballHeight) {
                 Log.d("gol","¡Gol en la portería inferior!")
+                golInferior++
+                Log.d("Gol inferior", "Goles anotados$golInferior")
                 val initialX = (displayMetrics.widthPixels - ballWidth) / 2f
                 val initialY = (displayMetrics.heightPixels - ballWidth) / 2f
                 ballImage.translationX = initialX

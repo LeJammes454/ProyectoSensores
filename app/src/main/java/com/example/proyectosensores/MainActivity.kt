@@ -15,18 +15,26 @@ import kotlin.math.log
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
+    //variable para el hilo
+    private lateinit var handler: Handler
+
+    //variables para los sensores
     private lateinit var sensorManager: SensorManager
     private lateinit var accelerometer: Sensor
+
+    //variables para el balon
     private lateinit var ballImage: ImageView
-    private lateinit var displayMetrics: DisplayMetrics
     private var ballWidth = 0
     private var ballHeight = 0
+
+    //variable para obtener el tamaño de la pantalla
+    private lateinit var displayMetrics: DisplayMetrics
+
+    //variable para las cordenadas x , y
     private var x = 0f
     private var y = 0f
-    private lateinit var handler: Handler
-    private lateinit var goalTop: ImageView
-    private lateinit var goalBottom: ImageView
 
+    // variables para las porterias xd
     private var goalTopX: Float = 0f
     private var goalTopY: Float = 0f
     private var goalBottomX: Float = 0f
@@ -37,13 +45,16 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private inner class UpdateBallPositionRunnable : Runnable {
         override fun run() {
+            // codenadas del balon
             val newX = ballImage.translationX - x
             val newY = ballImage.translationY + y
 
+            // obtenemos las dimenciones de la pantalla y tambien calibramos manualmente xd
             val dpw = displayMetrics.widthPixels - 120
             val dph = displayMetrics.heightPixels - 90
 
 
+            //logica para evitar que el balon se salga
             if (newX < 0) {
                 ballImage.translationX = 0f
             } else if (newX + ballWidth > dpw) {
@@ -60,14 +71,20 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 ballImage.translationY = newY
             }
 
+            //logica para caundo anota gol
             if (newX >= goalTopX && newX <= goalTopX + goalWidth && newY <= goalHeight) {
                 Log.d("gol","¡Gol en la portería superior!")
+                val initialX = (displayMetrics.widthPixels - ballWidth) / 2f
+                val initialY = (displayMetrics.heightPixels - ballWidth) / 2f
+                ballImage.translationX = initialX
+                ballImage.translationY = initialY
             } else if (newX >= goalBottomX && newX <= goalBottomX + goalWidth && newY >= dph - goalHeight - ballHeight) {
                 Log.d("gol","¡Gol en la portería inferior!")
+                val initialX = (displayMetrics.widthPixels - ballWidth) / 2f
+                val initialY = (displayMetrics.heightPixels - ballWidth) / 2f
+                ballImage.translationX = initialX
+                ballImage.translationY = initialY
             }
-
-
-
 
             handler.postDelayed(this, 16) // Se vuelve a enviar el mensaje al hilo secundario
         }
@@ -115,7 +132,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
         if (event != null && event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-            val acceleracion = 5
+            val acceleracion = 2// aqui modificacmos la velocidad del balon
             x = event.values[0] * acceleracion
             y = event.values[1] * acceleracion
         }
@@ -124,4 +141,5 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         // No se utiliza
     }
+
 }

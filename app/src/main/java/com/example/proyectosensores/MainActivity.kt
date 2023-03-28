@@ -1,42 +1,28 @@
 package com.example.proyectosensores
-
+import android.annotation.SuppressLint
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import android.util.DisplayMetrics
-import android.util.Log
 import android.widget.ImageView
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var sensorManager: SensorManager
     private lateinit var accelerometer: Sensor
-
     private lateinit var ballImage: ImageView
-
     private lateinit var displayMetrics: DisplayMetrics
-    private var ballWidth: Int = 0
+    private var ballWidth = 0
+    private var x = 0f
+    private var y = 0f
+    private lateinit var handler: Handler
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-
-        ballImage = findViewById(R.id.ballImage)
-        displayMetrics = resources.displayMetrics
-        ballWidth = ballImage.width
-    }
-    private val sensorListener = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent) {
-            val x = event.values[0]
-            val y = event.values[1]
-            Log.d("ACCELEROMETER", "x: $x, y: $y")
-
+    private inner class UpdateBallPositionRunnable : Runnable {
+        override fun run() {
             val newX = ballImage.translationX - x
             val newY = ballImage.translationY + y
 
@@ -55,22 +41,45 @@ class MainActivity : AppCompatActivity() {
             } else {
                 ballImage.translationY = newY
             }
-        }
 
-        override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-            // No necesitamos implementar esto
+            handler.postDelayed(this, 16) // Se vuelve a enviar el mensaje al hilo secundario
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        ballImage = findViewById(R.id.ballImage)
+        displayMetrics = resources.displayMetrics
+        ballWidth = ballImage.width
+
+        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
+        handler = Handler()
+        handler.post(UpdateBallPositionRunnable())
     }
 
     override fun onResume() {
         super.onResume()
-        sensorManager.registerListener(sensorListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME)
     }
 
     override fun onPause() {
         super.onPause()
-        sensorManager.unregisterListener(sensorListener)
+        sensorManager.unregisterListener(this)
     }
 
+    override fun onSensorChanged(event: SensorEvent?) {
+        if (event != null && event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+            val acceleracion = 5
+            x = event.values[0] * acceleracion
+            y = event.values[1] * acceleracion
+        }
+    }
 
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        // No se utiliza
+    }
 }

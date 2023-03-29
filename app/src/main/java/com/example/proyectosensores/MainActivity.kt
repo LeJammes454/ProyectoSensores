@@ -68,9 +68,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         scoreInf = findViewById<TextView>(R.id.scoreInferior)
 
 
+        val dpw = displayMetrics.widthPixels - 120
+        val dph = displayMetrics.heightPixels - 90
+
+
         // Actualizamos la posición inicial del balón para que inicie en la mitad de la pantalla
-        val initialX = (displayMetrics.widthPixels - ballWidth) / 2f
-        val initialY = (displayMetrics.heightPixels - ballWidth) / 2f
+        val initialX = (dpw- ballWidth) / 2f
+        val initialY = (dph - ballWidth) / 2f
         ballImage.translationX = initialX
         ballImage.translationY = initialY
 
@@ -84,15 +88,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
 
     private inner class UpdateBallPositionRunnable : Runnable {
+
+        // obtenemos las dimenciones de la pantalla y tambien calibramos manualmente xd
+        val dpw = displayMetrics.widthPixels - 120
+        val dph = displayMetrics.heightPixels - 90
+
         override fun run() {
             // codenadas del balon
             val newX = ballImage.translationX - x
             val newY = ballImage.translationY + y
-
-            // obtenemos las dimenciones de la pantalla y tambien calibramos manualmente xd
-            val dpw = displayMetrics.widthPixels - 120
-            val dph = displayMetrics.heightPixels - 90
-
 
             //logica para evitar que el balon se salga
             if (newX < 0) {
@@ -121,8 +125,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             handler.postDelayed(this, 16) // Se vuelve a enviar el mensaje al hilo secundario
         }
         fun reset(){
-            val initialX = (displayMetrics.widthPixels - ballWidth) / 2f
-            val initialY = (displayMetrics.heightPixels - ballWidth) / 2f
+            val initialX = (dpw - ballWidth) / 2f
+            val initialY = (dph - ballWidth) / 2f
             ballImage.translationX = initialX
             ballImage.translationY = initialY
         }

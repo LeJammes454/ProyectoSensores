@@ -13,6 +13,29 @@
         android:src="@drawable/soccer"
         tools:ignore="ContentDescription,MissingConstraints" />
 
+    <TextView
+        android:id="@+id/scoreSuperior"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="16dp"
+        android:background="#00000000"
+        android:text="goles anotados"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/scoreInferior"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="8dp"
+        android:background="#00000000"
+        android:text="goles anotados"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        android:textStyle="bold" />
 
 
 </RelativeLayout>

@@ -10,6 +10,7 @@ import android.os.Handler
 import android.util.DisplayMetrics
 import android.util.Log
 import android.widget.ImageView
+import android.widget.TextView
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
@@ -44,6 +45,43 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var golSuperior = 0
     private var golInferior = 0
 
+    lateinit var scoreSup : TextView
+    lateinit var scoreInf : TextView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        ballImage = findViewById(R.id.ballImage)
+        displayMetrics = resources.displayMetrics
+        ballWidth = ballImage.width
+        ballHeight = ballImage.height
+
+        goalWidth = displayMetrics.widthPixels * 0.4f
+        goalHeight = displayMetrics.heightPixels * 0.05f
+        goalTopX = (displayMetrics.widthPixels - goalWidth) / 2
+        goalTopY = 0f
+        goalBottomX = goalTopX
+        goalBottomY = displayMetrics.heightPixels - goalHeight
+
+        scoreSup = findViewById<TextView>(R.id.scoreSuperior)
+        scoreInf = findViewById<TextView>(R.id.scoreInferior)
+
+
+        // Actualizamos la posición inicial del balón para que inicie en la mitad de la pantalla
+        val initialX = (displayMetrics.widthPixels - ballWidth) / 2f
+        val initialY = (displayMetrics.heightPixels - ballWidth) / 2f
+        ballImage.translationX = initialX
+        ballImage.translationY = initialY
+
+        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
+        handler = Handler()
+        handler.post(UpdateBallPositionRunnable())
+    }
+
+
 
     private inner class UpdateBallPositionRunnable : Runnable {
         override fun run() {
@@ -75,55 +113,34 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
             //logica para caundo anota gol
             if (newX >= goalTopX && newX <= goalTopX + goalWidth && newY <= goalHeight) {
-                Log.d("gol","¡Gol en la portería superior!")
-                golSuperior++
-                Log.d("Gol inferior", "Goles anotados$golSuperior")
-                val initialX = (displayMetrics.widthPixels - ballWidth) / 2f
-                val initialY = (displayMetrics.heightPixels - ballWidth) / 2f
-                ballImage.translationX = initialX
-                ballImage.translationY = initialY
+                mensajelog("superior")
             } else if (newX >= goalBottomX && newX <= goalBottomX + goalWidth && newY >= dph - goalHeight - ballHeight) {
-                Log.d("gol","¡Gol en la portería inferior!")
-                golInferior++
-                Log.d("Gol inferior", "Goles anotados$golInferior")
-                val initialX = (displayMetrics.widthPixels - ballWidth) / 2f
-                val initialY = (displayMetrics.heightPixels - ballWidth) / 2f
-                ballImage.translationX = initialX
-                ballImage.translationY = initialY
+                mensajelog("inferior")
             }
 
             handler.postDelayed(this, 16) // Se vuelve a enviar el mensaje al hilo secundario
         }
-    }
+        fun reset(){
+            val initialX = (displayMetrics.widthPixels - ballWidth) / 2f
+            val initialY = (displayMetrics.heightPixels - ballWidth) / 2f
+            ballImage.translationX = initialX
+            ballImage.translationY = initialY
+        }
+        fun mensajelog(gol:String){
+            if (gol=="superior"){
+                golSuperior++
+                Log.d("gol","¡Gol en la portería superior!")
+                Log.d("Gol inferior", "Goles anotados$golSuperior")
+                scoreSup.text = "superior $golSuperior"
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        ballImage = findViewById(R.id.ballImage)
-        displayMetrics = resources.displayMetrics
-        ballWidth = ballImage.width
-        ballHeight = ballImage.height
-
-        goalWidth = displayMetrics.widthPixels * 0.4f
-        goalHeight = displayMetrics.heightPixels * 0.05f
-        goalTopX = (displayMetrics.widthPixels - goalWidth) / 2
-        goalTopY = 0f
-        goalBottomX = goalTopX
-        goalBottomY = displayMetrics.heightPixels - goalHeight
-
-
-        // Actualizamos la posición inicial del balón para que inicie en la mitad de la pantalla
-        val initialX = (displayMetrics.widthPixels - ballWidth) / 2f
-        val initialY = (displayMetrics.heightPixels - ballWidth) / 2f
-        ballImage.translationX = initialX
-        ballImage.translationY = initialY
-
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-
-        handler = Handler()
-        handler.post(UpdateBallPositionRunnable())
+            }else if(gol=="inferior"){
+                golInferior++
+                Log.d("gol","¡Gol en la portería inferior!")
+                Log.d("Gol inferior", "Goles anotados$golInferior")
+                scoreInf.text = "Inferior $golInferior"
+            }
+            reset()
+        }
     }
 
     override fun onResume() {
